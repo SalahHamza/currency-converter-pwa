@@ -1,0 +1,6 @@
+# ignore node/grunt dependency directories
+node_modules/
+
+# This file is used as a currencies seeder for testing
+# so that we don't abuse the API
+src/currencies.json

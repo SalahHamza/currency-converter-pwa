@@ -1,0 +1,31 @@
+{
+  "name": "currency-converter-pwa",
+  "version": "1.0.0",
+  "description": "Currency Converter Progressive Web App",
+  "main": "index.js",
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "idb": "^2.1.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0-beta.52",
+    "@babel/plugin-syntax-dynamic-import": "^7.0.0-beta.52",
+    "@babel/preset-env": "^7.0.0-beta.52",
+    "babel-loader": "^8.0.0-beta.4",
+    "css-loader": "^1.0.0",
+    "file-loader": "^1.1.11",
+    "style-loader": "^0.21.0",
+    "url-loader": "^1.0.1",
+    "webpack": "^4.15.1",
+    "webpack-cli": "^3.0.8",
+    "webpack-pwa-manifest": "^3.6.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "develop": "webpack --mode development --watch",
+    "build": "webpack --mode production"
+  },
+  "keywords": [],
+  "author": "Salah Hamza",
+  "license": "ISC"
+}

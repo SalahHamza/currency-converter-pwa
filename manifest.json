@@ -1,0 +1,22 @@
+{
+  "icons": [
+    {
+      "src": "/build/icons/icon_512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/build/icons/icon_192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "name": "Currency Converter",
+  "short_name": "CC",
+  "orientation": "portrait",
+  "display": "standalone",
+  "start_url": ".",
+  "description": "Currency Converter Progressive Web App",
+  "background_color": "#223843",
+  "theme_color": "#223843"
+}

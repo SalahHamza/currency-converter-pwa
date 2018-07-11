@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="Description" content="A modern Currency Conveter that works both online and offline.">
+	<meta name="theme-color" content="#223843"/>
+	<link rel="shortcut icon" href="/build/icons/icon_512x512.png">
+	<link rel="manifest" href="/manifest.json">
+   <script type="text/javascript" src="build/js/app.bundle.js"></script>
+   <title>Currency Converter</title>
+</head>
+<body>
+   <header class="headbar">
+      <h1>Currency Converter</h1>
+   </header>
+   <main class="main">
+      <div class="converter grid card">
+			<input class="amount" name="amount" type="number" value="1" min="1">
+			<div class="fromCurrency">
+				<label for="fromCurrency">From</label>
+				<select name="fromCurrency" id="fromCurrency"></select>
+			</div>
+			<button type="button" aria-label="swap" class="swap button">
+				<span class="icon-exchange"></span>
+			</button>
+			<div class="toCurrency">
+				<label for="toCurrency">To</label>
+				<select name="toCurrency" id="toCurrency"></select>
+			</div>
+			<button class="convert button" type="button">convert</button>
+		</div>
+		<div class="conversion card cardTemplate">
+			<div class="fromResult">
+				<input type="number" min="0" class="fromResultAmount" />
+				<button type="button" class="button fromResultName">USD</button>
+			</div>
+			<div class="toResult">
+				<span class="toResultAmount">xx.xxx</span>
+				<span class="toResultName">XXX</span>
+			</div>
+			<div class="rates">
+				<div class="fromRate">1 XXX = xx.xxxxxx XXX</div>
+				<div class="toRate">1 XXX = x.xxxxxx XXX</div>
+			</div>
+			<div class="date">Thu, 28 Jun 2018 10:00 PM CDT</div>
+			<div class="utils">
+				<span class="icon-trashcan close"></span>
+			</div>
+		</div>
+   </main>
+</body>
+</html>
