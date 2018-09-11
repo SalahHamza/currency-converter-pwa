@@ -1,5 +1,6 @@
 import idb from 'idb';
 import {insertAfter, handleErrors, iterObj} from './utils';
+import Snackbar from './snackbar';
 
 /**
  * open new IndexedDB database
@@ -14,6 +15,12 @@ const openDatabase = () => {
 }
 
 
+const removeChildren = (node) => {
+	while (node.firstChild) {
+    node.removeChild(node.firstChild);
+	}
+}
+
 export default class App {
 	constructor(){
 		this.$container = document.querySelector('.main');
@@ -26,6 +33,7 @@ export default class App {
 		this._addedConversions = [];
 		this._loadingCards = [];
 		this._messageShown = true;
+		Snackbar.setSnackbarCSS(document);
 	}
 
 	/****************************************
@@ -38,7 +46,7 @@ export default class App {
 	 */
 	_fetchCurrencies(){
 		const url = 'https://free.currencyconverterapi.com/api/v5/currencies?';
-		/* path is used for debugging & testing 
+		/* path is used for debugging & testing
 			so that we don't abuse the API */
 		const path = 'src/currencies.json';
 		return fetch(url)
@@ -51,9 +59,9 @@ export default class App {
 
 	/**
 	 * fetch conversion data from API
-	 * @param {String} fr - Currency to convert from 
+	 * @param {String} fr - Currency to convert from
 	 * @param {String} to - Currency to convert to
-	 * @param {Number} amount - Amount of money to 
+	 * @param {Number} amount - Amount of money to
 	 * @returns {Promise} promise that resolves with conversion data
 	 */
 	_fetchConversion(fr, to, amount){
@@ -69,10 +77,10 @@ export default class App {
 	*****************************************/
 
 	/**
-	 * 
-	 * @param {String} fr 
-	 * @param {String} to 
-	 * @param {Number} amount 
+	 *
+	 * @param {String} fr
+	 * @param {String} to
+	 * @param {Number} amount
 	 */
 	_getConversion(fr, to, amount){
 		this._fetchConversion(fr, to, amount).then(data => {
@@ -87,8 +95,8 @@ export default class App {
 
 	/**
 	 * Updates Conversion card data if it already exists
-	 * else it creates a new conversion card 
-	 * 
+	 * else it creates a new conversion card
+	 *
 	 * @param {Object} data - conversion data
 	 */
 	_putCoversionCard(data){
@@ -109,7 +117,7 @@ export default class App {
 
 	/**
 	 * inserts card to the top of the card list
-	 * @param {Objcet} card - new card to insert 
+	 * @param {Objcet} card - new card to insert
 	 */
 	_insertCard(card){
 		insertAfter(card, this.$converterCard);
@@ -118,7 +126,7 @@ export default class App {
 
 	/**
 	 * sets conversion data to conversion card
-	 * 
+	 *
 	 * @param {Object} card - card dom element
 	 * @param {*} data - conversion data
 	 */
@@ -135,7 +143,7 @@ export default class App {
 
 	/**
 	 * adds currency option to the from/to select elems
-	 * 
+	 *
 	 * @param {String} id - currency identifier
 	 */
 	_addCurrencyOption({id}){
@@ -149,7 +157,7 @@ export default class App {
 
 	/**
 	 * set dummy card until data arrives from aPI
-	 * @param {String} id - conversion id 
+	 * @param {String} id - conversion id
 	 */
 	_setPlaceholder(id){
 		if(!this._visibleCards[id]){
@@ -162,14 +170,14 @@ export default class App {
 
 	/**
 	 * create placeholder card
-	 * @param {String} id - conversion id 
+	 * @param {String} id - conversion id
 	 */
 	_createPlaceholder(id){
 		const placeholderElem = this.$cardTemplate.cloneNode(true);
 		placeholderElem.classList.remove('cardTemplate');
 		placeholderElem.classList.add('placeholder');
 		placeholderElem.setAttribute('id', id);
-		placeholderElem.innerHTML = 
+		placeholderElem.innerHTML =
 			`<div class="fromResult"><div class="organ animated"></div></div>
 			<div class="toResult"><div class="organ animated"></div></div>
 			<div class="rates">
@@ -179,27 +187,6 @@ export default class App {
 			<div class="date"><div class="organ animated"></div></div>
 			<div class="utils"><div class="organ animated"></div></div>`;
 		return placeholderElem;
-	}
-
-
-	/**
-	 * Show toast message (when network requests fail)
-	 */
-	_showMessage(){
-		let headsUpElem  = document.querySelector('.snackbar');
-		if(headsUpElem) return;
-		headsUpElem = document.createElement('div');
-		headsUpElem.classList.add('snackbar');
-		headsUpElem.classList.add('clearfix');
-		const message =
-			'You seem to be offline. If you have any saved conversions make sure to use them.';
-		headsUpElem.innerHTML +=  `<span class="message">${message}</span>
-											<span class="hide">Hide</span>`;
-		headsUpElem.querySelector('.hide').addEventListener('click', () => {
-			headsUpElem.remove();
-			this._messageShown = false;
-		});
-		this.$container.appendChild(headsUpElem);
 	}
 
 	/****************************************
@@ -231,8 +218,8 @@ export default class App {
 
 	/* Adds close/delete event to the conversion card */
 	/**
-	 * 
-	 * @param {Object} card - card dom element 
+	 *
+	 * @param {Object} card - card dom element
 	 * @param {*} id - conversion id
 	 */
 	_addDeleteEvent(card, id){
@@ -254,8 +241,8 @@ export default class App {
 	/**
 	 * adds fetched currencies to IDB if they are not there
 	 * and sets select options for every currency
-	 * 
-	 * @param {Object} db - opened IDB database object 
+	 *
+	 * @param {Object} db - opened IDB database object
 	 */
 	_addFetchedCurrencies(db){
 		this._fetchCurrencies().then( currencies => {
@@ -274,7 +261,7 @@ export default class App {
 	/**
 	 * Gets currencies from IDB if there else fetch from
 	 * network and add to IDB. then, set options
-	 * 
+	 *
 	 */
 	_getCurrencies(){
 		this._idbPromise.then( async (db) => {
@@ -339,8 +326,9 @@ export default class App {
 	 */
 	_registerServiceWorker(){
 		if(!navigator.serviceWorker) return;
+
 		navigator.serviceWorker.register('./sw.js')
-		.then(() => {
+		.then((reg) => {
 			 console.log('Sw registered');
 		})
 		.catch(() => {
@@ -400,8 +388,8 @@ export default class App {
 				this._addedConversions = conversions;
 				for(let conversion of this._addedConversions){
 					this._getConversion(
-						conversion.fr, 
-						conversion.to, 
+						conversion.fr,
+						conversion.to,
 						conversion.amount
 					);
 				}
@@ -423,10 +411,11 @@ export default class App {
 
 		/* create broadcast channel to receive messages from service worker */
 		if('BroadcastChannel' in window){
+			const offlineSnackbar = new Snackbar('You seem to be offline. If you have any saved conversions make sure to use them.');
 			const channel = new BroadcastChannel('sw-messages');
 			channel.addEventListener('message', event => {
 				if(event.data.isOffline && this._messageShown){
-					this._showMessage();
+					offlineSnackbar.show(this.$container);
 				}
 			});
 		}

@@ -12,11 +12,17 @@
    <title>Currency Converter</title>
 </head>
 <body>
-   <header class="headbar">
-      <h1>Currency Converter</h1>
-   </header>
-   <main class="main">
-      <div class="converter grid card">
+	<!-- Header start -->
+	<header class="headbar">
+		<h1>Currency Converter</h1>
+	</header>
+	<!-- Header end -->
+
+	<!-- main start -->
+	<main class="main">
+
+		<!-- Converter card start -->
+		<div class="converter grid card">
 			<input aria-label="Conversion amount" class="amount" name="amount" type="number" value="1" min="1">
 			<div class="fromCurrency">
 				<label for="fromCurrency">From</label>
@@ -31,6 +37,9 @@
 			</div>
 			<button class="convert button" type="button">convert</button>
 		</div>
+		<!-- converter card end -->
+
+		<!-- conversion cardTemplate start -->
 		<div class="conversion card cardTemplate">
 			<div class="fromResult">
 				<input type="number" min="0" class="fromResultAmount" />
@@ -49,6 +58,9 @@
 				<span class="icon-trashcan close"></span>
 			</div>
 		</div>
-   </main>
+		<!-- conversion cardTemplate end -->
+
+	</main>
+	<!-- main end -->
 </body>
 </html>
