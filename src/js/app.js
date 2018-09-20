@@ -1,6 +1,6 @@
 import idb from 'idb';
 import {insertAfter, handleErrors, iterObj} from './utils';
-import Snackbar from './snackbar';
+import Snackbars from '@salahhamza/snackbars';
 
 /**
  * open new IndexedDB database
@@ -33,7 +33,8 @@ export default class App {
 		this._addedConversions = [];
 		this._loadingCards = [];
 		this._messageShown = true;
-		Snackbar.setSnackbarCSS(document);
+
+		this.snackbars = new Snackbars(document.body, true);
 	}
 
 	/****************************************
@@ -329,20 +330,76 @@ export default class App {
 
 		navigator.serviceWorker.register('./sw.js')
 		.then((reg) => {
-			 console.log('Sw registered');
-		})
-		.catch(() => {
-			 console.log('Sw registeration failed');
+			if (!navigator.serviceWorker.controller) {
+				return;
+			}
+
+			if (reg.waiting) {
+				this._updateReady(reg.waiting);
+				return;
+			}
+
+			if (reg.installing) {
+				this._trackInstalling(reg.installing);
+				return;
+			}
+
+			reg.addEventListener('updatefound', () => {
+				this._trackInstalling(reg.installing);
+			});
+
+		}).catch(() => {
+			console.log('Sw registeration failed');
+			/* setting a retry function to retry exponentially */
+			let attempts = 1;
+			(function retry() {
+				attempts *= 2;
+				setTimeout(this._registerServiceWorker, attempts * 60 * 1000);
+			}());
 		});
- 	}
+
+		// Ensure refresh is only called once.
+		// This works around a bug in "force update on reload".
+		let refreshing;
+		navigator.serviceWorker.addEventListener('controllerchange', () => {
+			if (refreshing) return;
+			window.location.reload();
+			refreshing = true;
+		});
+	}
+
+	_trackInstalling (worker) {
+		worker.addEventListener('statechange', ()  => {
+			if (worker.state == 'installed') {
+				this._updateReady(worker);
+			}
+		});
+	};
+
+	_updateReady(worker) {
+		this.snackbars.show({
+			message: 'New version available',
+			name: 'update',
+			duration: 8000,
+			action: {
+				name: 'refresh',
+				handler() {
+					console.log('skip waiting and refreshing')
+					worker.postMessage({action: 'skipWaiting'});
+				}
+			}
+		});
+	};
 
 	/**
 	 * App initializer
 	 */
 	init(){
 		this._registerServiceWorker();
+
 		/* Getting currency options */
 		this._getCurrencies();
+
 		/* Add swap event to the swap button */
 		document.querySelector('.button.swap').addEventListener('click',() => {
 			/* select containers */
@@ -409,16 +466,6 @@ export default class App {
 			this._getConversion(fr, to, amount);
 		});
 
-		/* create broadcast channel to receive messages from service worker */
-		if('BroadcastChannel' in window){
-			const offlineSnackbar = new Snackbar('You seem to be offline. If you have any saved conversions make sure to use them.');
-			const channel = new BroadcastChannel('sw-messages');
-			channel.addEventListener('message', event => {
-				if(event.data.isOffline && this._messageShown){
-					offlineSnackbar.show(this.$container);
-				}
-			});
-		}
 	}
 }
 

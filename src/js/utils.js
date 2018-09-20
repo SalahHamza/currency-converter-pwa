@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * @param {Object} obj - object to turn into an iterable
  */
 export function* iterObj(obj = {}) {
@@ -13,7 +13,7 @@ export function* iterObj(obj = {}) {
 
 /**
  * handles errors of fetch reponse
- * @param {Object} response - response object to handle 
+ * @param {Object} response - response object to handle
  */
 export const handleErrors = (response) => {
 	if (!response.ok) throw Error(response.statusText);
@@ -22,8 +22,8 @@ export const handleErrors = (response) => {
 
 /**
  * Insert newNode after referenceNode
- * @param {Object} newNode - Dom node to insert 
- * @param {*} referenceNode - Dom node to insert after
+ * @param {Object} newNode - Dom node to insert
+ * @param {Object} referenceNode - Dom node to insert after
  */
 export const insertAfter = (newNode, referenceNode) => {
 	referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);

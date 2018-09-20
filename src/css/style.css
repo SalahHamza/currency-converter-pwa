@@ -9,9 +9,11 @@
 						GLOBAL
 *******************************************/
 
-html, body {
+html,
+body {
 	margin: 0;
 	padding: 0;
+	height: 100%;
 }
 
 body {
@@ -370,7 +372,7 @@ select {
 /********************************************
 					SNACKBAR
 ********************************************/
-.snackbar {
+/* .snackbar {
   opacity: 0;
 	position: fixed;
 	z-index: 3;
@@ -410,4 +412,4 @@ select {
     min-width: 300px;
     max-width: 600px;
 	}
-}
+} */

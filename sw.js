@@ -116,3 +116,12 @@ function fetchCurrency(request){
 		return handleOffline(request);
 	});
 }
+/**
+ * something to make service worker change
+ */
+
+self.addEventListener('message', event => {
+  if (event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});
