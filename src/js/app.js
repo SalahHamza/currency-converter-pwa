@@ -1,24 +1,16 @@
 import idb from 'idb';
-import {insertAfter, handleErrors, iterObj} from './utils';
 import Snackbars from '@salahhamza/snackbars';
+import {insertAfter, handleErrors, iterObj} from './utils';
 
 /**
- * open new IndexedDB database
- * @returns {Promise} idb promise
+ *	Opens IDB database and creates object stores
  */
 const openDatabase = () => {
 	return idb.open('converter-wp-app', 1, (upgradeDB) => {
-		console.log('opening DB');
+		console.log(`Opened database: ${name}`);
 		upgradeDB.createObjectStore('currencies', { keyPath: 'id' });
 		upgradeDB.createObjectStore('conversions',{ keyPath: 'id' });
 	});
-}
-
-
-const removeChildren = (node) => {
-	while (node.firstChild) {
-    node.removeChild(node.firstChild);
-	}
 }
 
 export default class App {
@@ -325,12 +317,17 @@ export default class App {
 	/**
 	 * Registers service workers
 	 */
-	_registerServiceWorker(){
+	_registerServiceWorker() {
 		if(!navigator.serviceWorker) return;
 
 		navigator.serviceWorker.register('./sw.js')
 		.then((reg) => {
 			if (!navigator.serviceWorker.controller) {
+				this.snackbars.show({
+					name: 'swRegistered',
+					message: 'Service Worker installed! Pages you view are cached for offline use.',
+					duration: 4500
+				});
 				return;
 			}
 
@@ -350,7 +347,7 @@ export default class App {
 
 		}).catch(() => {
 			console.log('Sw registeration failed');
-			/* setting a retry function to retry exponentially */
+			/* setting a retry function to retry sw registration */
 			let attempts = 1;
 			(function retry() {
 				attempts *= 2;
@@ -378,16 +375,17 @@ export default class App {
 
 	_updateReady(worker) {
 		this.snackbars.show({
-			message: 'New version available',
+			message: 'New version available! Refresh to update.',
 			name: 'update',
-			duration: 8000,
-			action: {
+			actions: [{
 				name: 'refresh',
 				handler() {
 					console.log('skip waiting and refreshing')
 					worker.postMessage({action: 'skipWaiting'});
 				}
-			}
+			}, {
+				name: 'dismiss'
+			}]
 		});
 	};
 
@@ -395,7 +393,7 @@ export default class App {
 	 * App initializer
 	 */
 	init(){
-		this._registerServiceWorker();
+		// this._registerServiceWorker();
 
 		/* Getting currency options */
 		this._getCurrencies();

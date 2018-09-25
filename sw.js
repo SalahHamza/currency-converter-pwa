@@ -23,7 +23,7 @@ self.addEventListener('install', (e) => {
 
 
 
-self.addEventListener('activate', function(e) {
+self.addEventListener('activate', (e) => {
 	e.waitUntil(
 		caches.keys().then( (keyList) => {
 			return Promise.all(
@@ -53,7 +53,7 @@ self.addEventListener('activate', function(e) {
 		match other requests
 
 */
-self.addEventListener('fetch', function(e) {
+self.addEventListener('fetch', (e) => {
   var dataUrl = 'https://free.currencyconverterapi.com/api/v5/convert?';
   if (e.request.url.includes(dataUrl)) {
 		e.respondWith(fetchCurrency(e.request));
@@ -73,14 +73,8 @@ self.addEventListener('fetch', function(e) {
  * to the app that it's offline
  * @param {Object} request - The Request the browser intends to make
  */
-function handleOffline(request){
+function handleOffline(request) {
 	console.log('Fetching from Cache');
-	if(BroadcastChannel){
-		/* Opening a new Broadcast channel */
-		const channel = new BroadcastChannel('sw-messages');
-		/* Sending a message to the app stating that we are offline */
-		channel.postMessage({isOffline: true});
-	}
 	return caches.match(request);
 }
 
@@ -116,12 +110,15 @@ function fetchCurrency(request){
 		return handleOffline(request);
 	});
 }
-/**
- * something to make service worker change
- */
 
-self.addEventListener('message', event => {
-  if (event.data.action === 'skipWaiting') {
+
+/**
+ * listening for a message from the client
+ * stating that service worker should skip the
+ * waiting state
+ */
+self.addEventListener('message', (e) => {
+  if (e.data.action === 'skipWaiting') {
     self.skipWaiting();
   }
 });
