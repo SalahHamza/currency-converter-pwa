@@ -5,40 +5,31 @@ const allCaches = [
 	dynamicCacheName
 ];
 
-self.addEventListener('install', (e) => {
-	e.waitUntil(
-		caches.open(staticCacheName).then( (cache) => {
-			return cache.addAll([
-				'./',
-				'./index.html',
-				'./build/js/app.bundle.js',
-				'./build/icons/icon_192x192.png',
-				'./build/icons/icon_512x512.png',
-				'./manifest.json',
-				'https://free.currencyconverterapi.com/api/v5/currencies?',
-			]);
-		})
-	);
+addEventListener('install', event => {
+	event.waitUntil(async function() {
+		const cache = await caches.open(staticCacheName);
+		await cache.addAll([
+			'./',
+			'./index.html',
+			'./build/js/app.bundle.js',
+			'./build/icons/icon_192x192.png',
+			'./build/icons/icon_512x512.png',
+			'./manifest.json'
+		]);
+	}());
+});
+
+addEventListener('activate', event => {
+	event.waitUntil(async function() {
+		const keyList = await caches.keys();
+		return keyList
+			.filter( key =>key.startsWith('convter-wp-') && !allCaches.includes(key))
+			.map( key => caches.delete(key));
+	}());
+	return clients.claim();
 });
 
 
-
-self.addEventListener('activate', (e) => {
-	e.waitUntil(
-		caches.keys().then( (keyList) => {
-			return Promise.all(
-				keyList.filter( (key) => {
-					return key.startsWith('convter-wp-') &&
-						!allCaches.includes(key);
-				})
-				.map( (key) => {
-					return caches.delete(key);
-				})
-			);
-		})
-	);
-	return self.clients.claim();
-});
 
 /*
 	If it's an API request:
@@ -51,33 +42,14 @@ self.addEventListener('activate', (e) => {
 			that we are fetching from cache so show offline message).
 	else:
 		match other requests
-
 */
-self.addEventListener('fetch', (e) => {
-  var dataUrl = 'https://free.currencyconverterapi.com/api/v5/convert?';
-  if (e.request.url.includes(dataUrl)) {
-		e.respondWith(fetchCurrency(e.request));
-
-  } else {
-    e.respondWith(
-      caches.match(e.request).then( (response) => {
-        return response || fetch(e.request);
-      })
-    );
-  }
+addEventListener('fetch', event => {
+	event.respondWith(async function() {
+		const cachedResponse = await caches.match(event.request);
+		if(cachedResponse) return cachedResponse;
+		return fetch(event.request);
+	}());
 });
-
-
-/**
- * matches request to cached data and sends message
- * to the app that it's offline
- * @param {Object} request - The Request the browser intends to make
- */
-function handleOffline(request) {
-	console.log('Fetching from Cache');
-	return caches.match(request);
-}
-
 
 /**
  * checks if online, fetch data from network,
@@ -86,29 +58,19 @@ function handleOffline(request) {
  * message to app that app is offline
  * @param {Object} request - The Request the browser intends to make
  */
-function fetchCurrency(request){
-	if(!navigator.onLine){
-		// We are OFFLINE
-		return handleOffline(request);
-	}
-	/* Trying to fetch from network */
-	return fetch(request).then( response => {
-		if(!response.ok){
-			// Online, but got 4xx or 5xx
-			throw new Error('Previous Data');
-		}
-		/* we are online and got the data */
+async function fetchCurrency(request){
+	try {
+		const networkResponse = await fetch(request);
+		// Online, but got 4xx or 5xx
+		if(!networkResponse || !networkResponse.ok) throw new Error('Previous Data');
 		console.log('Fetching from Network');
-		/* Cloning the response to cache it first */
-		const resClone = response.clone();
-		caches.open(dynamicCacheName).then( cache => {
-			cache.put(request, resClone);
-		});
+		const cache = await caches.open(dynamicCacheName);
+
+		cache.put(request, networkResponse.clone());
 		return response;
-	}).catch( () => {
-		/* handle 4xx, 5xx and other errors as if offline */
-		return handleOffline(request);
-	});
+	} catch(err) {
+		return await caches.match(request);
+	}
 }
 
 
@@ -117,8 +79,9 @@ function fetchCurrency(request){
  * stating that service worker should skip the
  * waiting state
  */
-self.addEventListener('message', (e) => {
-  if (e.data.action === 'skipWaiting') {
+
+addEventListener('message', event => {
+  if (event.data.action === 'skipWaiting') {
     self.skipWaiting();
   }
 });
