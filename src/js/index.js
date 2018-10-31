@@ -2,7 +2,7 @@ import App from './app';
 import { insertAfter } from './utils';
 import moneyDataURI from './../images/money.png';
 import './../css/style.css';
-import '@salahhamza/snackbars/snackbar.css';
+import '@salahhamza/snackbars/lib/snackbar.css';
 
 window.addEventListener('DOMContentLoaded', function(){
 	(function(/* Inserting inline brand image */){
