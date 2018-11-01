@@ -130,7 +130,12 @@ class App {
   addDeleteEvent(card, id) {
     if(!card) return;
     card.querySelector('.close').addEventListener('click', () => {
+      // remove conversion card from DOM
       card.remove();
+      // remove conversion from added conversions
+      this.addedConversions = this.addedConversions
+        .filter(conversion => conversion.id !== id);
+      // remove conversion from idb store
       this.idbHelper.deleteConversion(id);
     });
   }
