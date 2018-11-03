@@ -38,7 +38,7 @@ class App {
         return;
       }
       this.putCoversionCard(conversion);
-      this.addedConversions.push({id, fr, to, amount});
+      this.addedConversions.push(conversion);
       this.idbHelper.saveAddedConversions(this.addedConversions);
     });
   }
@@ -163,6 +163,7 @@ class App {
    * remove placeholder from DOM
    */
   removePlaceholder() {
+    if(!this.loadingCards[0]) return;
     this.loadingCards[0].remove();
     this.loadingCards.shift();
   }
@@ -172,12 +173,12 @@ class App {
    * @param {Object} card - card to replace placeholder with
    */
   replacePlaceholder(card) {
+    if(!this.loadingCards[0]) return;
     this.container.replaceChild(card, this.loadingCards[0]);
     this.loadingCards.shift();
   }
 
-
-  /* =============  ============= */
+  /* ============= Helpers ============= */
 
   /* ============= Handlers ============= */
   handleConvertClick() {
@@ -188,8 +189,32 @@ class App {
     /*  getting from and to currencies */
     const fr 	= this.fromSelectElem.value;
     const to  = this.toSelectElem.value;
-
-    this.addConversion(fr, to, amount);
+    const id = `${fr}_${to}`;
+    // show a loading card if no card with this id is already visible
+    if(!this.visibleCards[id]) {
+      this.addPlaceholder(id);
+    } else {
+      // show added conversion with this id if it already exists
+      for(let i in this.addedConversions) {
+        const savedConversion = this.addedConversions[i];
+        if(savedConversion.id === id) {
+          this.addedConversions[i].amount = amount;
+          this.putCoversionCard(savedConversion);
+          break;
+        }
+      }
+      this.idbHelper.saveAddedConversions(this.addedConversions);
+    }
+    this.idbHelper.fetchConversion(fr, to, amount, (error, conversion) => {
+      if(error) {
+        this.removePlaceholder();
+        console.error(error);
+        return;
+      }
+      this.putCoversionCard(conversion);
+      this.addedConversions.push(conversion);
+      this.idbHelper.saveAddedConversions(this.addedConversions);
+    });
   }
 
   handleSwapClick() {
@@ -240,6 +265,16 @@ class App {
       amount = Math.abs(Number(amount));
       const fr = frNameElem.textContent;
       const to = toNameElem.textContent;
+      const id = card.id;
+
+      for(let i in this.addedConversions) {
+        if(this.addedConversions[i].id === id) {
+          this.addedConversions[i].amount = amount;
+          this.setDataToCard(card, this.addedConversions[i]);
+          this.idbHelper.saveAddedConversions(this.addedConversions);
+          break;
+        }
+      }
 
       this.idbHelper.fetchConversion(fr, to, amount, (error, conversion) => {
         if(error) {
@@ -286,14 +321,21 @@ class App {
         console.log(error.message);
         return;
       }
-      this.addedConversions = conversions;
-      for(const conversion of this.addedConversions) {
-        this.addConversion(
-          conversion.fr,
-          conversion.to,
-          conversion.amount
-        );
+      for(let i in conversions) {
+        const savedConversion = conversions[i];
+        const {fr, to, amount} = savedConversion;
+        // show saved conversion first
+        this.putCoversionCard(savedConversion);
+        // fetch conversion from network and update UI
+        this.idbHelper.fetchConversion(fr, to, amount, (error, conversion) => {
+          if(conversion) {
+            this.putCoversionCard(conversion);
+            conversions[i] = conversion;
+          }
+        });
       }
+      this.addedConversions = conversions;
+      this.idbHelper.saveAddedConversions(this.addedConversions);
     });
   }
 
