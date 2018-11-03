@@ -146,6 +146,20 @@ class IDBHelper {
     }
   }
 
+  async saveConversion(conversion) {
+    try {
+      const db = await this.idbPromise;
+      if(!db) return;
+
+      const tx = db.transaction('conversions', 'readwrite');
+      const store = tx.objectStore('conversions');
+      store.put(conversion);
+      return tx.complete;
+    } catch(err) {
+      console.log(`Couldn't save ${conversion.id} conversion in IDB`, err);
+    }
+  }
+
   /**
    * get conversions saved in IDB
    *
