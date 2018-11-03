@@ -21,7 +21,6 @@ addEventListener('activate', event => {
       .filter(key => key !== staticCacheName)
       .map(key => caches.delete(key));
   }());
-  return self.clients.claim();
 });
 
 
