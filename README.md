@@ -1,6 +1,8 @@
 # Currency Converter Progressive Web App
 
-Currency Converter Progressive Web App capstone project for the Google Africa Challenge Scholarship: Mobile Web Course by Google, Udacity and Andela Learning Community.
+Currency Converter Progressive Web App capstone project for the Google Africa Challenge Scholarship: Mobile Web Specialist Course by Google, Udacity and Andela Learning Community.
+
+Check [the app demo](https://salahhamza.github.io/currency-converter-pwa/) live and functioning.
 
 ## Getting Started
 
@@ -65,5 +67,5 @@ No license.
 
 ## Acknowledgments
 
-* Thanks to ALC and Udacity for giving us the chance to learn new things
+* Thanks to ALC, Google and Udacity for giving us the chance to learn new things
 * Thanks to instructors and reviewers for being helpful and patient with us
