@@ -25,24 +25,6 @@ class App {
 
   /* ============= UI ============= */
 
-  addConversion(fr, to, amount) {
-    const id = `${fr}_${to}`;
-    // show a loading card if no card with this id is already visible
-    if(!this.visibleCards[id]) {
-      this.addPlaceholder(id);
-    }
-    this.idbHelper.fetchConversion(fr, to, amount, (error, conversion) => {
-      if(error) {
-        this.removePlaceholder();
-        console.error(error);
-        return;
-      }
-      this.putCoversionCard(conversion);
-      this.addedConversions.push(conversion);
-      this.idbHelper.saveAddedConversions(this.addedConversions);
-    });
-  }
-
   /**
    * adds conversion if it already
    * @param {Object} conversion - conversion data
@@ -178,9 +160,11 @@ class App {
     this.loadingCards.shift();
   }
 
-  /* ============= Helpers ============= */
-
   /* ============= Handlers ============= */
+
+  /**
+   * get and set conversion data to new card or existing one
+   */
   handleConvertClick() {
     const amountElem = document.querySelector('input.amount');
     /* turning amount into positive number */
@@ -200,10 +184,10 @@ class App {
         if(savedConversion.id === id) {
           this.addedConversions[i].amount = amount;
           this.putCoversionCard(savedConversion);
+          this.idbHelper.saveConversion(this.addedConversions[i]);
           break;
         }
       }
-      this.idbHelper.saveAddedConversions(this.addedConversions);
     }
     this.idbHelper.fetchConversion(fr, to, amount, (error, conversion) => {
       if(error) {
@@ -213,10 +197,13 @@ class App {
       }
       this.putCoversionCard(conversion);
       this.addedConversions.push(conversion);
-      this.idbHelper.saveAddedConversions(this.addedConversions);
+      this.idbHelper.saveConversion(conversion);
     });
   }
 
+  /**
+   * swap from currency with to currency in converter
+   */
   handleSwapClick() {
     /* select containers */
     const frContainer = this.fromSelectElem.parentNode;
@@ -271,7 +258,7 @@ class App {
         if(this.addedConversions[i].id === id) {
           this.addedConversions[i].amount = amount;
           this.setDataToCard(card, this.addedConversions[i]);
-          this.idbHelper.saveAddedConversions(this.addedConversions);
+          this.idbHelper.saveConversion(this.addedConversions[i]);
           break;
         }
       }
@@ -283,7 +270,7 @@ class App {
         }
         this.setDataToCard(card, conversion);
         this.addedConversions.push({id:`${fr}_${to}`, fr, to, amount});
-        this.idbHelper.saveAddedConversions(this.addedConversions);
+        this.idbHelper.saveConversion(conversion);
       });
     };
   }
