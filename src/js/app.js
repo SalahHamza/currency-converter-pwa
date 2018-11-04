@@ -2,7 +2,7 @@ import IDBHelper from './idbHelper';
 import {insertAfter} from './utils';
 
 class App {
-  constructor() {
+  constructor(snackbarsInstance) {
     // Elements
     this.container = document.querySelector('.main');
     this.cardTemplate = document.querySelector('.cardTemplate');
@@ -15,6 +15,7 @@ class App {
     this.loadingCards = [];
 
     this.idbHelper = new IDBHelper();
+    this.snackbars = snackbarsInstance;
 
     // binding handlers with 'this'
     this.handleConvertClick = this.handleConvertClick.bind(this);
@@ -111,14 +112,44 @@ class App {
 
   addDeleteEvent(card, id) {
     if(!card) return;
-    card.querySelector('.close').addEventListener('click', () => {
+    card.querySelector('.close').addEventListener('click', event => {
       // remove conversion card from DOM
-      card.remove();
-      // remove conversion from added conversions
-      this.addedConversions = this.addedConversions
-        .filter(conversion => conversion.id !== id);
-      // remove conversion from idb store
-      this.idbHelper.deleteConversion(id);
+      let remove = true;
+
+      // hiding the card
+      card.style.display = 'none';
+      card.setAttribute('aria-hidden', 'true');
+
+      this.snackbars.show({
+        name: 'undoCardDelete',
+        message: `${id} conversion has been removed`,
+        actions: [{
+          name: 'undo',
+          handler() {
+            // If the user wishes to undo the card removal
+            // we show the card again and make sure the
+            // conversion isn't deleted in IDB
+            remove = false;
+            card.style.display = 'block';
+            card.setAttribute('aria-hidden', 'false');
+          }
+        }],
+        duration: 4000
+      });
+
+      // giving the users enough time to decide if they
+      // want to undo the conversion removal
+      setTimeout(() => {
+        if(!remove) return;
+        // remove conversion from added conversions
+        this.addedConversions = this.addedConversions
+          .filter(conversion => conversion.id !== id);
+        // remove conversion from idb store
+        this.idbHelper.deleteConversion(id);
+      }, 4500);
+
+      // Prevents other listeners of the same event from being called
+      event.stopImmediatePropagation();
     });
   }
 
