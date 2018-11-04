@@ -21,6 +21,7 @@ class App {
     this.handleConvertClick = this.handleConvertClick.bind(this);
     this.handleSwapClick = this.handleSwapClick.bind(this);
     this.handleInCardConvertClick = this.handleInCardConvertClick.bind(this);
+    this.handleCardConversionDelete = this.handleCardConversionDelete.bind(this);
 
   }
 
@@ -112,45 +113,9 @@ class App {
 
   addDeleteEvent(card, id) {
     if(!card) return;
-    card.querySelector('.close').addEventListener('click', event => {
-      // remove conversion card from DOM
-      let remove = true;
-
-      // hiding the card
-      card.style.display = 'none';
-      card.setAttribute('aria-hidden', 'true');
-
-      this.snackbars.show({
-        name: 'undoCardDelete',
-        message: `${id} conversion has been removed`,
-        actions: [{
-          name: 'undo',
-          handler() {
-            // If the user wishes to undo the card removal
-            // we show the card again and make sure the
-            // conversion isn't deleted in IDB
-            remove = false;
-            card.style.display = 'block';
-            card.setAttribute('aria-hidden', 'false');
-          }
-        }],
-        duration: 4000
-      });
-
-      // giving the users enough time to decide if they
-      // want to undo the conversion removal
-      setTimeout(() => {
-        if(!remove) return;
-        // remove conversion from added conversions
-        this.addedConversions = this.addedConversions
-          .filter(conversion => conversion.id !== id);
-        // remove conversion from idb store
-        this.idbHelper.deleteConversion(id);
-      }, 4500);
-
-      // Prevents other listeners of the same event from being called
-      event.stopImmediatePropagation();
-    });
+    card
+      .querySelector('.close')
+      .addEventListener('click', this.handleCardConversionDelete(card, id));
   }
 
   /**
@@ -303,6 +268,51 @@ class App {
         this.addedConversions.push({id:`${fr}_${to}`, fr, to, amount});
         this.idbHelper.saveConversion(conversion);
       });
+    };
+  }
+
+  /**
+   * returns handler for delete button click in every (specific) card
+   */
+  handleCardConversionDelete(card, id) {
+    return event => {
+      // remove conversion card from DOM
+      let remove = true;
+
+      // hiding the card
+      card.style.display = 'none';
+      card.setAttribute('aria-hidden', 'true');
+
+      this.snackbars.show({
+        name: 'undoCardDelete',
+        message: `${id} conversion has been removed`,
+        actions: [{
+          name: 'undo',
+          handler() {
+            // If the user wishes to undo the card removal
+            // we show the card again and make sure the
+            // conversion isn't deleted in IDB
+            remove = false;
+            card.style.display = 'block';
+            card.setAttribute('aria-hidden', 'false');
+          }
+        }],
+        duration: 4000
+      });
+
+      // giving the users enough time to decide if they
+      // want to undo the conversion removal
+      setTimeout(() => {
+        if(!remove) return;
+        // remove conversion from added conversions
+        this.addedConversions = this.addedConversions
+          .filter(conversion => conversion.id !== id);
+        // remove conversion from idb store
+        this.idbHelper.deleteConversion(id);
+      }, 4500);
+
+      // Prevents other listeners of the same event from being called
+      event.stopImmediatePropagation();
     };
   }
 
