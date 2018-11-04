@@ -1,8 +1,8 @@
-import Snackbars from '@salahhamza/snackbars';
+
 
 export default class ServiceWorkerRegistration {
-  constructor() {
-    this.snackbars = new Snackbars(null, true);
+  constructor(snackbarsInstance) {
+    this.snackbars = snackbarsInstance;
   }
 
   /**

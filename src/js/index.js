@@ -5,8 +5,11 @@ import moneyDataURI from './../images/money.png';
 import './../css/style.css';
 import '@salahhamza/snackbars/lib/snackbar.css';
 import ServiceWorkerRegistration from './swRegistration';
+import Snackbars from '@salahhamza/snackbars';
 
-window.addEventListener('DOMContentLoaded', function(){
+const snackbarsInstance = new Snackbars(null, true);
+
+window.addEventListener('DOMContentLoaded', () => {
 
   ((/* Inserting inline brand image */) => {
     const brandImage = document.createElement('img');
@@ -17,11 +20,11 @@ window.addEventListener('DOMContentLoaded', function(){
   })();
 
   // initilize app
-  const app = new App();
+  const app = new App(snackbarsInstance);
   app.init();
 });
 
 window.addEventListener('load', () => {
-  const swRegisterer = new ServiceWorkerRegistration();
+  const swRegisterer = new ServiceWorkerRegistration(snackbarsInstance);
   swRegisterer.registerServiceWorker();
 });
