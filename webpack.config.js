@@ -22,7 +22,22 @@ module.exports = {
         loader: 'babel-loader'
       }, {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
+        use: [
+          'style-loader',
+          // 'importLoaders' allow postcss-loader to
+          // be applied to @imported resources
+          { loader: 'css-loader', options: { importLoaders: 1 } },
+          { loader: 'postcss-loader',
+            options: {
+              ident: 'postcss',
+              plugins: [
+                require('postcss-preset-env')({
+                  autoprefixer: { grid: true }
+                })
+              ]
+            }
+          }
+        ]
       }, {
         test: /\.(png|jpg|gif)$/,
         loader: 'url-loader'
