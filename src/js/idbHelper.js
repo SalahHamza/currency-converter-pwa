@@ -23,10 +23,9 @@ class IDBHelper {
    * @param {function} callback - callback to invoke when data is fetched or failed
    */
   async _fetchCurrencies(error, callback) {
-    // const url = 'https://free.currencyconverterapi.com/api/v5/currencies?';
-    const path = 'src/currencies.json';
+    const url = 'https://free.currencyconverterapi.com/api/v5/currencies?';
     try {
-      const response = await fetch(path);
+      const response = await fetch(url);
       const data = await response.json();
       const currencies = objToArray(data.results);
       callback(null, currencies);
